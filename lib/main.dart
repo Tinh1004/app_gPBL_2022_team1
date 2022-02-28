@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math';
+import 'package:app_temperature/components/ListCharts.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:app_temperature/model/Temperature.dart';
@@ -39,8 +40,8 @@ class _MyHomePageState extends State<MyHomePage> {
   int random(min, max){
     return min + Random().nextInt(max - min);
   }
-  var temperature = "";
-  var humidity = "";
+  var temperature = 0;
+  var humidity = 0;
   final now = new DateTime.now();
   String formatter = "";
 
@@ -49,11 +50,11 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     //callApi();
-    timer = Timer.periodic(Duration(seconds: 2), (Timer t) => callApi());
+    timer = Timer.periodic(Duration(seconds: 1), (Timer t) => callApi());
   }
 
   getCurrentDate() {
-    return DateFormat('dd-MM-yyyy').format(DateTime.now());
+    return DateFormat('dd-MM-yyyy  hh:mm aaa').format(DateTime.now());
   }
 
   void callApi() {
@@ -65,26 +66,24 @@ class _MyHomePageState extends State<MyHomePage> {
     var response1 = await http.get(Uri.parse(url1));
     var response2 = await http.get(Uri.parse(url2));
 
-    var _newTemperature= "";
-    var _newHumidity= "";
+    var _newTemperature= 0;
+    var _newHumidity= 0;
 
     if(response1.statusCode == 200){
       var m = jsonDecode(response1.body)["field1"];
-      _newTemperature = m;
+      _newTemperature = int.parse(m);
       print(m);
     }else{
-      _newHumidity = "";
+      _newHumidity = 0;
     }
 
     if(response2.statusCode == 200){
       var m = jsonDecode(response2.body)["field2"];
-      _newHumidity = m;
+      _newHumidity = int.parse(m);
       print(m);
     }else{
-      _newHumidity = "";
+      _newHumidity = 0;
     }
-
-    Temperature newT = new Temperature(_newTemperature,_newHumidity);
 
     setState((){
       temperature= _newTemperature;
@@ -93,136 +92,236 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  Widget buildCountWidget(){
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        Container(
-          height: 250,
-          decoration: new BoxDecoration(
-            color: Colors.orange,
+  Widget buildCardShow(){
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      height: 230,
+      decoration: new BoxDecoration(
+        color: Colors.orangeAccent,
+        borderRadius: BorderRadius.circular(10.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.5),
+            spreadRadius: 5,
+            blurRadius: 7,
+            offset: Offset(0, 3), // changes position of shadow
           ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-
-            children: [
-              Text("Temperature",
-                style: TextStyle(
-                  fontSize: 43,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white
-// <<<<<<< HEAD
-// =======
-//
-// >>>>>>> 8828f9c89c06bce0a74a6196218e229a82e2604f
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            margin: EdgeInsets.only(top: 30, left: 20),
+            child: Column(
+              children: [
+                Text(
+                  "Temperature",
+                  style: TextStyle(
+                      fontSize: 30.0,
+                      color: Colors.white
+                  ),
                 ),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  IconButton(
-                      icon: Icon(Icons.settings_system_daydream),
-                      color: Colors.white,
-                      iconSize: 80,
-                      onPressed: () {  }
-                  ),
-                  Text(
-                    temperature.toString()+"\u2103",
-                    style: TextStyle(
-                        fontSize: 80.0,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.white
-
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-        Container(
-          height: 250,
-          decoration: new BoxDecoration(
-            color: Colors.blue,
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-
-            children: [
-              Text("Humidity",
-                style: TextStyle(
-                    fontSize: 43,
-                    fontWeight: FontWeight.bold,
-                  color: Colors.white
+                SizedBox(
+                  height: 10.0,
                 ),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  IconButton(
-                      icon: Icon(Icons.water_damage),
-                      color: Colors.white,
-                      iconSize: 80,
-                      onPressed: () {  }
+                Text(
+                  "23.4\u2103",
+                  style: TextStyle(
+                      fontSize: 50.0,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white
                   ),
-
-                  Text(
-                    humidity.toString()+" %",
-                    style: TextStyle(
-                        fontSize: 80.0,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.white
-                    ),
-                  ),
-                ],
-              ),
-            ],
+                ),
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
-      appBar: AppBar(
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.only(left: 20.0, right:20.0),
+          child: Column(
+            children: [
+              Container(
+                margin: EdgeInsets.only(top: 20.0, bottom: 20.0),
+                child: Text(
+                  widget.title,
+                  style: TextStyle(
+                    fontSize: 30.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.left,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 10.0),
+                child: Text('${formatter}', style: TextStyle(
+                    fontSize: 30,
+                    color: Colors.blue
+                ),),
+              ),
 
-        title: Text(widget.title),
-      ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 10.0),
-            child: Text('${formatter}', style: TextStyle(
-                fontSize: 30,
-                color: Colors.blue
-            ),),
+              SizedBox(
+                height: 50,
+              ),
+
+              //tem
+              Container(
+                width: MediaQuery.of(context).size.width,
+                height: 230,
+                decoration: new BoxDecoration(
+                  color: temperature > 30
+                      ?Colors.orangeAccent
+                  :Colors.blueAccent,
+                  borderRadius: BorderRadius.circular(10.0),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.5),
+                      spreadRadius: 5,
+                      blurRadius: 7,
+                      offset: Offset(0, 3), // changes position of shadow
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      margin: EdgeInsets.only(top: 30, left: 20),
+                      child: Column(
+                        children: [
+                          Text(
+                            "Temperature",
+                            style: TextStyle(
+                                fontSize: 30.0,
+                                color: Colors.white
+                            ),
+                          ),
+                          SizedBox(
+                            height: 10.0,
+                          ),
+                          Text(
+                            "${temperature}\u2103",
+                            style: TextStyle(
+                                fontSize: 50.0,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(
+                height: 50,
+              ),
+
+
+
+              //hum
+              Container(
+                width: MediaQuery.of(context).size.width,
+                height: 230,
+                decoration: new BoxDecoration(
+                  color: Colors.blue,
+                  borderRadius: BorderRadius.circular(10.0),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.5),
+                      spreadRadius: 5,
+                      blurRadius: 7,
+                      offset: Offset(0, 3), // changes position of shadow
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      margin: EdgeInsets.only(top: 30, left: 20),
+                      child: Column(
+                        children: [
+                          Text(
+                            "Humidity",
+                            style: TextStyle(
+                                fontSize: 30.0,
+                                color: Colors.white
+                            ),
+                          ),
+                          SizedBox(
+                            height: 10.0,
+                          ),
+                          Text(
+                            "${humidity}%",
+                            style: TextStyle(
+                                fontSize: 50.0,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(
+                height: 50,
+              ),
+              Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Sensor 1",
+                        style: TextStyle(
+                          fontSize: 30.0,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black54
+                        ),
+                      ),
+                      Text(
+                          "${temperature * 9/5 + 32}\u2109",
+                        style: TextStyle(
+                            fontSize: 30.0,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.black54
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              TextButton(
+                style: TextButton.styleFrom(
+                  textStyle: const TextStyle(fontSize: 20),
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => ListCharts()),
+                  );
+                },
+                child: const Text('Charts', style: TextStyle(
+                    fontSize: 30,
+                    color: Colors.blue
+                ),),
+              ),
+            ],
           ),
-          Expanded(
-              child: buildCountWidget()
-          ),
-          TextButton(
-            style: TextButton.styleFrom(
-              textStyle: const TextStyle(fontSize: 20),
-            ),
-            onPressed: () {},
-            child: const Text('Charts', style: TextStyle(
-              fontSize: 30,
-              color: Colors.blue
-            ),),
-          ),
-        ],
+        ),
       ),
 
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          callApi();
-        },
-        backgroundColor: Colors.green,
-        child: const Icon(Icons.refresh_rounded),
-      ),
     );
   }
 }
