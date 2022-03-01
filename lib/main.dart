@@ -52,6 +52,11 @@ class _MyHomePageState extends State<MyHomePage> {
     //callApi();
     timer = Timer.periodic(Duration(seconds: 1), (Timer t) => callApi());
   }
+  @override
+  void dispose() {
+    timer.cancel();
+    super.dispose();
+  }
 
   getCurrentDate() {
     return DateFormat('dd-MM-yyyy  hh:mm aaa').format(DateTime.now());
@@ -80,6 +85,7 @@ class _MyHomePageState extends State<MyHomePage> {
     if(response2.statusCode == 200){
       var m = jsonDecode(response2.body)["field2"];
       _newHumidity = int.parse(m);
+
       print(m);
     }else{
       _newHumidity = 0;
@@ -92,54 +98,6 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  Widget buildCardShow(){
-    return Container(
-      width: MediaQuery.of(context).size.width,
-      height: 230,
-      decoration: new BoxDecoration(
-        color: Colors.orangeAccent,
-        borderRadius: BorderRadius.circular(10.0),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.5),
-            spreadRadius: 5,
-            blurRadius: 7,
-            offset: Offset(0, 3), // changes position of shadow
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            margin: EdgeInsets.only(top: 30, left: 20),
-            child: Column(
-              children: [
-                Text(
-                  "Temperature",
-                  style: TextStyle(
-                      fontSize: 30.0,
-                      color: Colors.white
-                  ),
-                ),
-                SizedBox(
-                  height: 10.0,
-                ),
-                Text(
-                  "23.4\u2103",
-                  style: TextStyle(
-                      fontSize: 50.0,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -173,52 +131,88 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
 
               //tem
-              Container(
-                width: MediaQuery.of(context).size.width,
-                height: 230,
-                decoration: new BoxDecoration(
-                  color: temperature > 30
-                      ?Colors.orangeAccent
-                  :Colors.blueAccent,
-                  borderRadius: BorderRadius.circular(10.0),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.5),
-                      spreadRadius: 5,
-                      blurRadius: 7,
-                      offset: Offset(0, 3), // changes position of shadow
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      margin: EdgeInsets.only(top: 30, left: 20),
-                      child: Column(
-                        children: [
-                          Text(
-                            "Temperature",
-                            style: TextStyle(
-                                fontSize: 30.0,
-                                color: Colors.white
-                            ),
-                          ),
-                          SizedBox(
-                            height: 10.0,
-                          ),
-                          Text(
-                            "${temperature}\u2103",
-                            style: TextStyle(
-                                fontSize: 50.0,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white
-                            ),
-                          ),
-                        ],
+              GestureDetector(
+                onTap: (){
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => ListCharts("Temperature",0)),
+                  );
+                },
+                child: Container(
+                  width: MediaQuery.of(context).size.width,
+                  height: 230,
+                  decoration: new BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage(
+                          temperature <= 25
+                              ? "assets/image/cold.jpg"
+                              : temperature >= 30
+                                ?"assets/image/hot.jpg"
+                                :"assets/image/normally.jpg"
+
                       ),
+                      fit: BoxFit.cover,
                     ),
-                  ],
+                    borderRadius: BorderRadius.circular(10.0),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.5),
+                        spreadRadius: 5,
+                        blurRadius: 7,
+                        offset: Offset(0, 3), // changes position of shadow
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: MediaQuery.of(context).size.width*0.5,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              margin: EdgeInsets.only(top: 30, left: 20),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    "Temperature",
+                                    style: TextStyle(
+                                        fontSize: 28.0,
+                                        color: Colors.white
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: 10.0,
+                                  ),
+                                  Text(
+                                    "${temperature}\u2103",
+                                    style: TextStyle(
+                                        fontSize: 50.0,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        width: MediaQuery.of(context).size.width*0.4,
+                        height: MediaQuery.of(context).size.width*0.4,
+                        child: Image(
+                            image: AssetImage(
+                                temperature <= 25
+                                    ?'assets/icon/temperature_2.png'
+                                    : temperature >= 30
+                                      ?'assets/icon/temperature_1.png'
+                                      : 'assets/icon/normally.png'
+                            ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               SizedBox(
@@ -228,50 +222,78 @@ class _MyHomePageState extends State<MyHomePage> {
 
 
               //hum
-              Container(
-                width: MediaQuery.of(context).size.width,
-                height: 230,
-                decoration: new BoxDecoration(
-                  color: Colors.blue,
-                  borderRadius: BorderRadius.circular(10.0),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.5),
-                      spreadRadius: 5,
-                      blurRadius: 7,
-                      offset: Offset(0, 3), // changes position of shadow
+              GestureDetector(
+                onTap: (){
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => ListCharts("Humidity",1)),
+                  );
+                },
+                child: Container(
+                  width: MediaQuery.of(context).size.width,
+                  height: 230,
+                  decoration: new BoxDecoration(
+                    // color: Colors.blue,
+                    image: DecorationImage(
+                      image: AssetImage("assets/image/humidyti.jpg"),
+                      fit: BoxFit.cover,
                     ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      margin: EdgeInsets.only(top: 30, left: 20),
-                      child: Column(
-                        children: [
-                          Text(
-                            "Humidity",
-                            style: TextStyle(
-                                fontSize: 30.0,
-                                color: Colors.white
-                            ),
-                          ),
-                          SizedBox(
-                            height: 10.0,
-                          ),
-                          Text(
-                            "${humidity}%",
-                            style: TextStyle(
-                                fontSize: 50.0,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white
-                            ),
-                          ),
-                        ],
+                    borderRadius: BorderRadius.circular(10.0),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.5),
+                        spreadRadius: 5,
+                        blurRadius: 7,
+                        offset: Offset(0, 3), // changes position of shadow
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: MediaQuery.of(context).size.width *0.5,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              margin: EdgeInsets.only(top: 30, left: 20),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    "Humidity",
+                                    style: TextStyle(
+                                        fontSize: 30.0,
+                                        color: Colors.white
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: 10.0,
+                                  ),
+                                  Text(
+                                    "${humidity}%",
+                                    style: TextStyle(
+                                        fontSize: 50.0,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        width: MediaQuery.of(context).size.width*0.4,
+                        height: MediaQuery.of(context).size.width*0.4,
+                        child: Image(
+                          image: AssetImage(
+                              'assets/icon/humidity.png'
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               SizedBox(
@@ -301,21 +323,6 @@ class _MyHomePageState extends State<MyHomePage> {
                     ],
                   ),
                 ],
-              ),
-              TextButton(
-                style: TextButton.styleFrom(
-                  textStyle: const TextStyle(fontSize: 20),
-                ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => ListCharts()),
-                  );
-                },
-                child: const Text('Charts', style: TextStyle(
-                    fontSize: 30,
-                    color: Colors.blue
-                ),),
               ),
             ],
           ),
