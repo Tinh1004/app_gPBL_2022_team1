@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:app_temperature/components/ListCharts.dart';
+import 'package:app_temperature/components/Loading.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:app_temperature/model/Temperature.dart';
@@ -37,9 +38,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int random(min, max){
-    return min + Random().nextInt(max - min);
-  }
+  var check = false;
   var temperature = 0;
   var humidity = 0;
   final now = new DateTime.now();
@@ -95,14 +94,18 @@ class _MyHomePageState extends State<MyHomePage> {
       temperature= _newTemperature;
       humidity = _newHumidity;
       formatter = getCurrentDate();
+      check = true;
     });
   }
 
-
+  double convertF(int value){
+    return value * 9/5 + 32;
+  }
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SingleChildScrollView(
+    return  Scaffold(
+      body: check
+          ? SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.only(left: 20.0, right:20.0),
           child: Column(
@@ -305,7 +308,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        "Sensor 1",
+                        "Sensor",
                         style: TextStyle(
                           fontSize: 30.0,
                           fontWeight: FontWeight.w500,
@@ -313,7 +316,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         ),
                       ),
                       Text(
-                          "${temperature * 9/5 + 32}\u2109",
+                          "${convertF(temperature)}\u2109",
                         style: TextStyle(
                             fontSize: 30.0,
                             fontWeight: FontWeight.w500,
@@ -327,8 +330,8 @@ class _MyHomePageState extends State<MyHomePage> {
             ],
           ),
         ),
-      ),
-
+      )
+          : Loading(),
     );
   }
 }
